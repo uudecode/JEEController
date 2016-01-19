@@ -28,8 +28,8 @@ class Location : public UUIDable
       return this->locationName;
     }
 
-    String getConfig() {
-      String result = "<Location";
+    String getConfig(Switch *switches,int switchesSize,Sensor *sensors,int sensorsSize) {
+      String result = "\n\t\t<Location";
       result += " uuid=\"" ;
       result += this->getLocationUUID();
       result += "\"" ;
@@ -37,29 +37,30 @@ class Location : public UUIDable
       result += this->getLocationName();
       result += "\"" ;
       result += ">";
-
+      result += getSwitchesConfig(switches,switchesSize);
+      result += getSensorsConfig(sensors,sensorsSize);
+      result += "\n\t\t</Location>";
       return result  ;
-
     }
 
 
     String getSwitchesConfig(Switch *switches,int switchesSize) {
-      String result = "\n\t<Switches>";
+      String result = "\n\t\t\t<Switches>";
 
       for (int s = 0; s < switchesSize ; s++) {
         result += switches[s].getConfig();
       }
-      result += "\n\t</Switches>";
+      result += "\n\t\t\t</Switches>";
       return result;
     }
 
     String getSensorsConfig(Sensor *sensors,int sensorsSize) {
-      String result = "\n\t<Sensors>";
+      String result = "\n\t\t\t<Sensors>";
 
       for (int s = 0; s < sensorsSize ; s++) {
         result += sensors[s].getConfig();
       }
-      result += "\n\t</Sensors>";
+      result += "\n\t\t\t</Sensors>";
       return result;
     }
     

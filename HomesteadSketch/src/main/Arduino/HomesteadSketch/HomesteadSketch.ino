@@ -11,11 +11,23 @@
 
 String HomesteadName = "Limbo";
 
-//Locations: locations[1] = {};
-Yard yard = Yard();
 
-//Sensor *s, *s2, *l1, *currSensor;
-//SensorsStorage *ss;
+Yard yard = Yard();
+Barn barn = Barn();
+Sauna sauna = Sauna();
+
+String getConfig(){
+  String result = "<Homestead name =\"";
+  result += HomesteadName;
+  result += "\">";
+  result += "\n\t<Locations>";
+  result += yard.getConfig();
+  result += barn.getConfig();
+  result += sauna.getConfig();
+  result += "\n\t</Locations>";
+  result += "\n</Homestead>";
+  return result;
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,20 +35,10 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Initializing " + HomesteadName);
   randomSeed(analogRead(0));
-//  s = new TemperatureSensor(42, "Temperature in Sauna");
-//  s2 = new TemperatureSensor(43, "Temperature in First floor room");
-//  l1 = new LightSensor(45, "Illumination at outdoor");
-//  ss = new SensorsStorage();
-//  ss->put(s);
-//  ss->put(s2);
-//  ss->put(l1);
-//  currSensor = ss->getSensor(0);
-//  Serial.println(ss->getSensor(0)->getSensorName());
-//  Serial.println(ss->getSensor(1)->getSensorName());
-//  Serial.println(ss->getSensor(2)->getSensorName());
-Serial.println(yard.getConfig());
+  String homesteadConfig = getConfig();
+  Serial.println(homesteadConfig);
 
-  
+
 }
 
 void loop() {

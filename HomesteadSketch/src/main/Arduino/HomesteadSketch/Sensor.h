@@ -30,7 +30,7 @@ class Sensor :  public UUIDable {
     }
     
     String getConfig() {
-      String result = "\n\t\t<Sensor";
+      String result = "\n\t\t\t\t<Sensor";
       result += " uuid=\"" ;
       result += this->getSensorUUID();
       result += "\"" ;

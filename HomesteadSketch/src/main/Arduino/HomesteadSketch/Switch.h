@@ -61,7 +61,7 @@ class Switch : public UUIDable
 
 
     String getConfig() {
-      String result = "\n\t\t<Switch";
+      String result = "\n\t\t\t\t<Switch";
       result += " uuid=\"" ;
       result += this->getSwitchUUID();
       result += "\"" ;
