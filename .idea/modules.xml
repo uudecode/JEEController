@@ -2,6 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Controller/Controller.iml" filepath="$PROJECT_DIR$/Controller/Controller.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ControllerEAR/ControllerEAR.iml" filepath="$PROJECT_DIR$/ControllerEAR/ControllerEAR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ControllerServlet/ControllerServlet.iml" filepath="$PROJECT_DIR$/ControllerServlet/ControllerServlet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HomesteadSketch/HomesteadSketch.iml" filepath="$PROJECT_DIR$/HomesteadSketch/HomesteadSketch.iml" />
       <module fileurl="file://$PROJECT_DIR$/JEEController.iml" filepath="$PROJECT_DIR$/JEEController.iml" />
     </modules>
   </component>

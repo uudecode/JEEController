@@ -22,10 +22,23 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="JEEController" />
+        <module name="ControllerEAR" />
+        <module name="ControllerServlet" />
+        <module name="HomesteadSketch" />
+      </profile>
+      <profile default="false" name="Annotation profile for Controller" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="Controller" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="Controller" target="1.6" />
+      <module name="ControllerEAR" target="1.5" />
+      <module name="ControllerServlet" target="1.5" />
+      <module name="HomesteadSketch" target="1.5" />
       <module name="JEEController" target="1.5" />
     </bytecodeTargetLevel>
   </component>

@@ -1,0 +1,8 @@
+<Location uuid="8f006600-2f00-6600-5000-78006d00bc00" name="Yard">
+    <Switch uuid="3800f700-be00-7400-7b00-bd0012004600" name="Well Pump"/>
+    <Switch uuid="3800f700-be00-7400-7b00-bd0012004600" name="Well Pump"/>
+    <Switch uuid="10009e00-7d00-9b00-8d00-d000a7001600" name="Outdoors Lamps"/>
+    <Switch uuid="59001800-d300-1600-c100-1e0074005400" name="1"/>
+    <Switch uuid="0e00c800-7e00-e900-9a00-0f00b200a000"
+            name="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+</Location>

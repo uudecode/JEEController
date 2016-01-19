@@ -7,6 +7,13 @@
     <groupId>ru.spb.trak.homesteads</groupId>
     <artifactId>JEEController</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
+    <modules>
+        <module>Controller</module>
+        <module>ControllerEAR</module>
+        <module>ControllerServlet</module>
+        <module>HomesteadSketch</module>
+    </modules>
 
 </project>

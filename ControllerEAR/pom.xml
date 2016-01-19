@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>JEEController</artifactId>
+        <groupId>ru.spb.trak.homesteads</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>ControllerEAR</artifactId>
+    <packaging>ear</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>ru.spb.trak.homesteads</groupId>
+            <artifactId>Controller</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>ru.spb.trak.homesteads</groupId>
+            <artifactId>ControllerServlet</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <version>6</version>
+                    <applicationName>JEEHomesteadsController</applicationName>
+                    <displayName>Control homesteads with arduino ${project.version}</displayName>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <generateApplicationXml>true</generateApplicationXml>
+                    <archive>
+                        <addMavenDescriptor>true</addMavenDescriptor>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Class-Path>configuration</Class-Path>
+                        </manifestEntries>
+                    </archive>
+                    <modules>
+                        <ejbModule>
+                            <groupId>ru.spb.trak.homesteads</groupId>
+                            <artifactId>Controller</artifactId>
+                        </ejbModule>
+                    </modules>
+                    <finalName>JEEController</finalName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
