@@ -13,6 +13,15 @@ class Debuggable {
 #endif
     }
 
+    String copyToString (const char str[]) {
+      char c;
+      String result;
+      if (str)
+        while ((c = pgm_read_byte(str++)))
+          result += c;
+
+      return result;
+    }
 };
 
 

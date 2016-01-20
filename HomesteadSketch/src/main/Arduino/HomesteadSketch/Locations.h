@@ -51,10 +51,27 @@ class Sauna : public Location {
     }
 
   protected:
-    Switch switches[1] = {Switch(22,  "Освещение", false, false ) 
+    Switch switches[1] = {Switch(22,  "Освещение в парной", false, false ) 
                          };
-    Sensor sensors[2] = {MockSensor(23, "Влажность воздуха")
+    Sensor sensors[2] = {MockSensor(23, "Влажность воздуха в парной")
                          , TemperatureSensor(21, "Температура в парной")
+                        };
+};
+
+class WashingRoom : public Location {
+  public:
+    WashingRoom() : Location("Моечная") {}; 
+
+    String getConfig() {
+      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+      return result  ;
+    }
+
+  protected:
+    Switch switches[1] = {Switch(24,  "Освещение в моечной", false, false ) 
+                         };
+    Sensor sensors[2] = {MockSensor(25, "Показания CO в моечной")
+                         , TemperatureSensor(26, "Температура в моечной")
                         };
 };
 

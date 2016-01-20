@@ -1,3 +1,4 @@
+#include <avr/pgmspace.h>
 #include "UUIDable.h"
 #include "Switch.h"
 #ifndef LOCATION_H
@@ -29,38 +30,38 @@ class Location : public UUIDable
     }
 
     String getConfig(Switch *switches,int switchesSize,Sensor *sensors,int sensorsSize) {
-      String result = "\n\t\t<Location";
-      result += " uuid=\"" ;
+      String result = F("\n\t\t<Location");
+      result += F(" uuid=\"") ;
       result += this->getLocationUUID();
       result += "\"" ;
-      result += " name=\"" ;
+      result += F(" name=\"") ;
       result += this->getLocationName();
       result += "\"" ;
       result += ">";
       result += getSwitchesConfig(switches,switchesSize);
       result += getSensorsConfig(sensors,sensorsSize);
-      result += "\n\t\t</Location>";
+      result += F("\n\t\t</Location>");
       return result  ;
     }
 
 
     String getSwitchesConfig(Switch *switches,int switchesSize) {
-      String result = "\n\t\t\t<Switches>";
+      String result = F("\n\t\t\t<Switches>");
 
       for (int s = 0; s < switchesSize ; s++) {
         result += switches[s].getConfig();
       }
-      result += "\n\t\t\t</Switches>";
+      result += F("\n\t\t\t</Switches>");
       return result;
     }
 
     String getSensorsConfig(Sensor *sensors,int sensorsSize) {
-      String result = "\n\t\t\t<Sensors>";
+      String result = F("\n\t\t\t<Sensors>");
 
       for (int s = 0; s < sensorsSize ; s++) {
         result += sensors[s].getConfig();
       }
-      result += "\n\t\t\t</Sensors>";
+      result += F("\n\t\t\t</Sensors>");
       return result;
     }
     
