@@ -677,7 +677,7 @@ bool ESP8266::eATCIFSR(String &list)
 {
   rx_empty();
   m_puart->println("AT+CIFSR");
-  return recvFindAndFilter("OK", "+CIFSR:STAIP,", "\r\n+C", list);
+  return recvFindAndFilter("OK", "+CIFSR:STAIP,", "\r\n+CIFSR:STAMAC", list);
 }
 bool ESP8266::sATCIPMUX(uint8_t mode)
 {

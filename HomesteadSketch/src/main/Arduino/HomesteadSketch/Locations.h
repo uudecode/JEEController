@@ -10,6 +10,11 @@ class Yard : public Location {
       String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
       return result  ;
     }
+
+    boolean setSwitch(String switchUUID, boolean toState){
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
+    }
+    
   protected:
     Switch switches[4] = {Switch(15,  "Насос в колодце", false, false ) 
                           , Switch(16,  "Освещение двора", false, false )
@@ -34,8 +39,12 @@ class Barn : public Location {
       return result  ;
     }
 
+    boolean setSwitch(String switchUUID, boolean toState){
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
+    }
+
+
   protected:
-    // TODO Русские буквы для сети
     Switch switches[1] = {Switch(22,  "Питание", false, false ) 
                          };
     Sensor sensors[];
@@ -48,6 +57,10 @@ class Sauna : public Location {
     String getConfig() {
       String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
       return result  ;
+    }
+
+    boolean setSwitch(String switchUUID, boolean toState){
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
     }
 
   protected:
@@ -67,6 +80,10 @@ class WashingRoom : public Location {
       return result  ;
     }
 
+    boolean setSwitch(String switchUUID, boolean toState){
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
+    }
+    
   protected:
     Switch switches[1] = {Switch(24,  "Освещение в моечной", false, false ) 
                          };

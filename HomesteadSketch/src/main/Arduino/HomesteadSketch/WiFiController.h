@@ -29,28 +29,61 @@ class WiFiController : public Debuggable {
     };
     void begin() {
       Serial1.begin(115200);
+      wifi.restart();
       wifi.disableMUX();
       checkConnect();
-      Serial.println("close connect!");
-      delay(10000);
-      checkConnect();
-      delay(10000);
-      checkConnect();
-
     };
 
     String getCommand () {
-      String command;
+      if (!wifi.kick()) {
+        Serial.print("ESP8266 look's dead :( \r\n");
+        begin();
+      }
+
       checkConnect();
-      //      if(wifi.waitResponse()){
-      //      onDataReceive(controllerConnection.getId(),command,);
-      //
-      //      } else
-      //      debug("no command from controller");
+      uint8_t buffer[128] = {0};
+      uint32_t len = wifi.recv(buffer, sizeof(buffer), 1000);
+      String command;
+
+      if (len > 0) {
+        for (uint32_t i = 0; i < len; i++) {
+          command += (char)buffer[i];
+        }
+      }
       return command;
     }
 
-    void putAnswer(String answer) {
+    void putAnswer(String const &answer) {
+      int sendSize = 0;
+      int answerLength = answer.length();
+      int sendBufferSize = sizeof(sendBuffer);
+      int iterations = (1 + ((answerLength - 1) / sendBufferSize));
+      if (0 == (answerLength % sendBufferSize))
+        iterations += 1;
+
+      Serial.println("answer=[" + answer + "] answerLength=[" + String(answerLength) + "] sendBufferSize=[" + String(sendBufferSize) + "] iterations: " + String(iterations));
+
+      for (int x = 0; x < iterations  ; x++) {
+        (answer.substring(x * sendBufferSize, (x * sendBufferSize) + sendBufferSize )).toCharArray(sendBuffer, sendBufferSize + 1);
+        //Serial.print(answer.substring(x * sendBufferSize, (x * sendBufferSize) + sendBufferSize ));
+        //        Serial.println(sendBuffer);
+        Serial.println("Iteration: " + String(x) + " answerLength % sendBufferSize: [" + String(answerLength % sendBufferSize) + "] answerLength: [" + String (answerLength) + "] sendBufferSize: [" + String(sendBufferSize) + "]");
+
+        if (x < (iterations - 1))
+          sendSize = sendBufferSize;
+        else
+          sendSize = (answerLength % sendBufferSize);
+
+
+        Serial.println("sendSize: " + String(sendSize));
+        if (0 < sendSize) {
+          wifi.send((const uint8_t*)sendBuffer, sendSize);
+        }
+      }
+
+      //sendBuffer
+      //      answer.toCharArray(buffer, 4096);
+      //      wifi.send((const uint8_t*)sendBuffer, len);
 
     }
   private:
@@ -60,23 +93,21 @@ class WiFiController : public Debuggable {
     boolean connectedToController = false;
     char networkName[30];
     char networkPassword[20];
-    char command[200];
+    char command[64];
+    char sendBuffer[16];
+
+
 
     void checkConnect() {
-//      Serial.println("wifi.getIPStatus(): [" + wifi.getIPStatus()+"] wifi.getIPStatus().length(): " + String(wifi.getIPStatus().length()));
-//      tryConnectToWAN();
-//      Serial.println("wifi.getIPStatus(): [" + wifi.getIPStatus()+"] wifi.getIPStatus().length(): " + String(wifi.getIPStatus().length()));
-//      tryConnectToController();
-//      Serial.println("wifi.getIPStatus(): [" + wifi.getIPStatus()+"] wifi.getIPStatus().length(): " + String(wifi.getIPStatus().length()));
-      
-      if (0 == (wifi.getIPStatus().length()) ) {
-        debug("No connect to controller.");
+      if (-1 == (wifi.getIPStatus().indexOf("CIPSTATUS:0,\"TCP\"")) ) {
+        Serial.println(F("No connect to controller."));
+        //        debug(wifi.getLocalIP());
         if ((wifi.getLocalIP()).equals("\"0.0.0.0\"")) {
-          debug("Need connect to wifi");
+          //          debug(F("Need connect to wifi"));
           connectedToWAN = tryConnectToWAN();
         }
         else {
-          debug(" Not need connect to wifi");
+          //          debug(F("Not need connect to wifi"));
           connectedToWAN = true;
         }
 
@@ -84,13 +115,13 @@ class WiFiController : public Debuggable {
         {
           connectedToController = tryConnectToController();
         } else {
-          debug("No connect to controller!");
+          Serial.println(F("No connect to controller!"));
         }
-      } else debug("Connect to controller alredy exists.");
+      } //else debug("Connect to controller alredy exists.");
 
     }
-    
-    
+
+
     boolean tryConnectToController() {
       boolean isConnected = false;
       for (int attempts = 3; attempts > 0 ; attempts --) {
@@ -104,6 +135,7 @@ class WiFiController : public Debuggable {
 
     boolean tryConnectToWAN() { // 3 times to every net.
       boolean isConnected = false;
+      String listAp = wifi.getAPList();
       for ( int i = 0 ; (i < (sizeof(ssids) / sizeof(*ssids)) && !isConnected) ; i += 2) {
 
         strcpy_P(networkName, (char*)pgm_read_word(&(ssids[i])));
@@ -111,12 +143,13 @@ class WiFiController : public Debuggable {
         int attempts = 3;
 
         for (int attempts = 3; attempts > 0 ; attempts --) {
-          if (!wifi.joinAP(networkName, networkPassword) ) {
-            delay(1000);
-          } else {
-            isConnected = true;
-            break;
-          }
+          if (0 < listAp.indexOf("\"" + String(networkName) + "\""))
+            if (!wifi.joinAP(networkName, networkPassword) ) {
+              delay(100);
+            } else {
+              isConnected = true;
+              break;
+            }
         }
       }
       debug(isConnected ? "Connected to WAN" : "No WAN connection" );

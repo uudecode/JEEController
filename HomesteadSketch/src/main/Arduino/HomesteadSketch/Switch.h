@@ -4,8 +4,12 @@
 #ifndef SWITCH_H
 #define SWITCH_H
 
-#define SWITCH_OFF false;
-#define SWITCH_ON true;
+#ifndef SWITCH_OFF
+#define SWITCH_OFF false
+#endif
+#ifndef SWITCH_ON
+#define SWITCH_ON true
+#endif
 
 class Switch : public UUIDable
 {
@@ -59,6 +63,25 @@ class Switch : public UUIDable
       return this->switchState;
     }
 
+    inline String getSwitchStringState() {
+      return (this->switchState ? "ON" : "OFF");
+    }
+
+
+    inline void turnOn() {
+      Serial.println(" to ON " + this->switchUUID);
+      this->switchState = SWITCH_ON;
+      digitalWrite(this->switchPin, ((this->switchState) ? HIGH : LOW));
+      EEPROM.write(this->EEPROMaddress, B00000010 + ((this->switchState) ? B00000001 : B00000000));
+    }
+
+    inline void turnOff() {
+      Serial.println(" to OFF " + this->switchUUID);
+      this->switchState = SWITCH_OFF;
+      digitalWrite(this->switchPin, ((this->switchState) ? HIGH : LOW));
+      EEPROM.write(this->EEPROMaddress, B00000010 + ((this->switchState) ? B00000001 : B00000000));
+    }
+
 
     String getConfig() {
       String result = "\n\t\t\t\t<Switch";
@@ -70,6 +93,9 @@ class Switch : public UUIDable
       result += "\"" ;
       result += " pin=\"" ;
       result += this->getSwitchPin();
+      result += "\"" ;
+      result += " state=\"" ;
+      result += this->getSwitchStringState();
       result += "\"" ;
       result += "/>";
       return result  ;

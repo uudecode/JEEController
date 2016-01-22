@@ -9,7 +9,12 @@
 #include "Locations.h"
 #include "WiFiController.h"
 
-
+#ifndef SWITCH_OFF
+#define SWITCH_OFF false
+#endif
+#ifndef SWITCH_ON
+#define SWITCH_ON true
+#endif
 
 const char homesteadName[] PROGMEM = "Дача";
 
@@ -17,21 +22,20 @@ Yard yard = Yard();
 Barn barn = Barn();
 Sauna sauna = Sauna();
 WashingRoom washingRoom = WashingRoom();
-WiFiController wifiController = WiFiController("93.100.131.244",37002);
+WiFiController wifiController = WiFiController("93.100.131.244", 37002);
 
-//const char string_0[] PROGMEM = "long long long long long long long long long long long long String 0";
 
 String getConfig() {
-  String result = F("<Homestead name =\"");
+  String result = "<Homestead name =\"";
   result += copyToString(homesteadName);
   result += "\">";
-  result += F("\n\t<Locations>");
+  result += "\n\t<Locations>";
   result += yard.getConfig();
   result += barn.getConfig();
   result += sauna.getConfig();
   result += washingRoom.getConfig();
-  result += F("\n\t</Locations>");
-  result += F("\n</Homestead>");
+  result += "\n\t</Locations>";
+  result += "\n</Homestead>\n";
   return result;
 }
 
@@ -40,17 +44,66 @@ void setup() {
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
   Serial.println("Initializing " + copyToString(homesteadName));
+
+  //  char sendBuffer[64];
+  //  Serial.println("sizeof(sendBuffer): " + String(sizeof(sendBuffer)) + " ceil??(73/sizeof(sendBuffer)):" + (1 + ((73 - 1) / sizeof(sendBuffer))) );
+
   randomSeed(analogRead(0));
   String homesteadConfig = getConfig();
   Serial.println(homesteadConfig);
   wifiController.begin();
-  //  Serial.println(copyToString(string_0));
-  //  printString(string_0);
-  //  Serial.println("\n");
 }
 
 void loop() {
+  String command;
+  command = wifiController.getCommand();
+  if (0 < command.length()) {
+    Serial.println("recieved command: [" + command + "] length(): " + String(command.length()) + " command.indexOf(\"getConfig\"):" + String( command.indexOf("getConfig")));
+    if (-1 < command.indexOf("getConfig")) {
+      String conf = getConfig();
+      Serial.println("conf.length()" + String(conf.length()));
+      wifiController.putAnswer(conf);
+      return;
+    }
+    if (-1 < command.indexOf("turnOn:")) {
+      boolean result = switchCommand(command, SWITCH_ON);
+      wifiController.putAnswer(result ? "OK\n" : "FAULT\n");
+      return;
+    }
+    if ( -1 < command.indexOf("turnOff:")) {
+      boolean result = switchCommand(command, SWITCH_OFF);
+      wifiController.putAnswer(result ? "OK\n" : "FAULT\n");
+      return;
+    }
+    if ( -1 < command.indexOf("long!")) {
+      
+      wifiController.putAnswer(F("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678\n"));
+      return;
+    } 
+      wifiController.putAnswer("UNKNOWN COMMAND:" + command + "\n");
+  }
 
+}
+
+boolean switchCommand(String command, boolean toState) {
+  boolean result = false;
+  Serial.println("recieved command: [" + command + "] length(): " + String(command.length()) + " command.indexOf(\"getConfig\"):" + String( command.indexOf("getConfig")));
+  int32_t index1 = command.indexOf(":");
+  int32_t index2 = command.indexOf("\n");
+  if (0 < index1) {
+    String uuid;
+    if (0 > index2)
+      uuid = command.substring(index1 + 1);
+    else
+      uuid = command.substring(index1 + 1, index2);
+
+    Serial.println("uuid:[" + uuid + "]");
+    result = (yard.setSwitch(uuid, toState)
+              || barn.setSwitch(uuid, toState)
+              || sauna.setSwitch(uuid, toState)
+              || washingRoom.setSwitch(uuid, toState) );
+  }
+  return result;
 }
 
 void printString(const char str[]) {
