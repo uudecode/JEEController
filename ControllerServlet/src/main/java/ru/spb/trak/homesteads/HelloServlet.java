@@ -16,8 +16,7 @@ import java.io.PrintWriter;
 public class HelloServlet extends HttpServlet {
 
     @EJB(name = "ControllerEJB")
-    ru.spb.trak.homesteads.ControllerBean controller;
-
+    ControllerBean controller;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -30,11 +29,11 @@ public class HelloServlet extends HttpServlet {
 
         // Write the response message, in an HTML page
         try {
-            out.println("<!DOCTYPE html>");
-            out.println("<html><head>");
-            out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-            out.println("<title>Hello, World</title></head>");
-            out.println("<body>");
+//            out.println("<!DOCTYPE html>");
+//            out.println("<html><head>");
+//            out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
+//            out.println("<title>Hello, World</title></head>");
+//            out.println("<body>");
             out.println("<h1>Hello, world!</h1>");  // says Hello
             // Echo client's request information
             out.println("<p>Request URI: " + request.getRequestURI() + "</p>");
@@ -43,12 +42,12 @@ public class HelloServlet extends HttpServlet {
             out.println("<p>Remote Address: " + request.getRemoteAddr() + "</p>");
             // Generate a random number upon each request
             out.println("<p>A Random Number: <strong>" + Math.random() + "</strong></p>");
-            out.println("<p>Barrel???: <strong>" + controller.doBarrel() + "</strong></p>");
+            out.println("<p>Barrel???: <strong>" + controller.getHomesteadStatus() + "</strong></p>");
             out.println("<p>EJB <strong>" + controller.toString() + "</strong></p>");
-            out.println("</body>");
-            out.println("</html>");
+//            out.println("</body>");
+//            out.println("</html>");
         } finally {
-            out.close();  // Always close the output writer
+            //out.close();  // Always close the output writer
         }
     }
 }

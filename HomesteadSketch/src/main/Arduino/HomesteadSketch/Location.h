@@ -9,35 +9,18 @@ class Location : public UUIDable
 
   public:
 
-    inline Location( String locationUUID,  String locationName ) {
-      //debug("Location construct: " + locationUUID  + " name: " + locationName);
-      this->locationUUID = locationUUID;
-      this->locationName = locationName;
+    Location( String locationUUIDx,  String locationNamex) :  locationName(locationNamex),locationUUID(locationUUIDx){
     }
 
-    inline Location(String locationName ) : Location(generateUUID(), locationName) {};
-
-    inline Location() : Location("n/a") {};
-
-
-    inline String getLocationUUID() {
-      return this->locationUUID;
-    }
-
-
-    inline String getLocationName() {
-      return this->locationName;
-    }
+    Location(String locationName ) : Location(generateUUID(), locationName) {};
 
     String getConfig(Switch *switches, int switchesSize, Sensor *sensors, int sensorsSize) {
       String result = "\n\t\t<Location";
       result += " uuid=\"" ;
-      result += this->getLocationUUID();
-      result += "\"" ;
-      result += " name=\"";
-      result += this->getLocationName();
-      result += "\"" ;
-      result += ">";
+      result += this->locationUUID;
+      result += "\" name=\"";
+      result += this->locationName;
+      result += "\">";
       result += getSwitchesConfig(switches, switchesSize);
       result += getSensorsConfig(sensors, sensorsSize);
       result += "\n\t\t</Location>";
@@ -83,8 +66,8 @@ class Location : public UUIDable
     }
 
   protected:
-    String locationName;
-    String locationUUID;
+    String const locationUUID;
+    String const locationName;
 
 
 };

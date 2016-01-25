@@ -94,7 +94,7 @@ class WiFiController : public Debuggable {
     char networkName[30];
     char networkPassword[20];
     char command[64];
-    char sendBuffer[16];
+    char sendBuffer[256];
 
 
 

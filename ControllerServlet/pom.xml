@@ -43,7 +43,7 @@
                     <archive>
                         <addMavenDescriptor>true</addMavenDescriptor>
                         <manifest>
-                            <addClasspath>true</addClasspath>
+                            <addClasspath>false</addClasspath>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>configuration</Class-Path>
