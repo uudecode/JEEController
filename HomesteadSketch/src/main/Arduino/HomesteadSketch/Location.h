@@ -15,8 +15,8 @@ class Location : public UUIDable
     Location(String locationName ) : Location(generateUUID(), locationName) {};
 
     String getConfig(Switch *switches, int switchesSize, Sensor *sensors, int sensorsSize) {
-      String result = "\n\t\t<Location";
-      result += " uuid=\"" ;
+      Serial.println("entering getConfig for " + locationName);
+      String result = "\n\t\t<Location uuid=\"" ;
       result += this->locationUUID;
       result += "\" name=\"";
       result += this->locationName;
@@ -24,6 +24,8 @@ class Location : public UUIDable
       result += getSwitchesConfig(switches, switchesSize);
       result += getSensorsConfig(sensors, sensorsSize);
       result += "\n\t\t</Location>";
+      Serial.println("exiting getConfig for " + locationName);
+
       return result  ;
     }
 

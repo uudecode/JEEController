@@ -81,10 +81,7 @@ class WiFiController : public Debuggable {
         }
       }
 
-      //sendBuffer
-      //      answer.toCharArray(buffer, 4096);
-      //      wifi.send((const uint8_t*)sendBuffer, len);
-
+ 
     }
   private:
     String controllerAdress;
