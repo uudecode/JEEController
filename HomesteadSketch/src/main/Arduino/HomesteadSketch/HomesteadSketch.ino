@@ -20,6 +20,7 @@
 
 WiFiController *wifiController = new WiFiController("93.100.131.244", 37001);
 const char homesteadName[] PROGMEM = "Дача";
+const char homesteadXMLtemplate[] PROGMEM = "Дача";
 
 Yard *yard = new Yard();
 Barn *barn = new Barn();
@@ -28,7 +29,6 @@ WashingRoom *washingRoom = new WashingRoom();
 char configuration[2048];
 
 void getConfig() {
-//  sprintf(configuration,"<Homestead name =\"%s\">\n\t<Locations>\n\t</Locations>\n</Homestead>\n",copyToString(homesteadName).c_str());
   sprintf(configuration,"<Homestead name =\"%s\">\n\t<Locations>%s%s%s%s\n\t</Locations>\n</Homestead>\n",copyToString(homesteadName).c_str(),(yard->getConfig()).c_str(),(barn->getConfig()).c_str(),(sauna->getConfig()).c_str(), (washingRoom->getConfig()).c_str() );
 }
 

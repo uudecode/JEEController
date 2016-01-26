@@ -11,11 +11,13 @@
 #define SWITCH_ON true
 #endif
 
+static char switchConfiguration[128];
+
 class Switch : public UUIDable
 {
   public:
 
-    inline Switch( String switchUUID, byte switchPin, String switchName, boolean normallyOpen, boolean turnOn ) {
+    Switch( String switchUUID, byte switchPin, String switchName, boolean normallyOpen, boolean turnOn ) {
       this->switchUUID = switchUUID;
       this->switchPin = switchPin;
       this->switchName = switchName;
@@ -40,30 +42,30 @@ class Switch : public UUIDable
 
     }
 
-    inline Switch( byte switchPin, String switchName , boolean normallyOpen, boolean turnOn ) : Switch(generateUUID(), switchPin, switchName, normallyOpen, turnOn) {};
+    Switch( byte switchPin, String switchName , boolean normallyOpen, boolean turnOn ) : Switch(generateUUID(), switchPin, switchName, normallyOpen, turnOn) {};
 
-    inline Switch( byte switchPin, String switchName ) : Switch(switchPin, switchName, false, false) {};
+    Switch( byte switchPin, String switchName ) : Switch(switchPin, switchName, false, false) {};
 
-    inline Switch( byte switchPin ) : Switch(switchPin, "n/a", false, false) {};
+    Switch( byte switchPin ) : Switch(switchPin, "n/a", false, false) {};
 
 
-    inline String getSwitchUUID() {
+    String getSwitchUUID() {
       return this->switchUUID;
     }
 
-    inline byte getSwitchPin() {
+    byte getSwitchPin() {
       return this->switchPin;
     }
 
-    inline String getSwitchName() {
+    String getSwitchName() {
       return this->switchName;
     }
 
-    inline boolean getSwitchState() {
+    boolean getSwitchState() {
       return this->switchState;
     }
 
-    inline String getSwitchStringState() {
+    String getSwitchStringState() {
       return (this->switchState ? "ON" : "OFF");
     }
 
@@ -82,24 +84,30 @@ class Switch : public UUIDable
       EEPROM.write(this->EEPROMaddress, B00000010 + ((this->switchState) ? B00000001 : B00000000));
     }
 
-
     String getConfig() {
-      String result = "\n\t\t\t\t<Switch";
-      result += " uuid=\"" ;
-      result += this->getSwitchUUID();
-      result += "\"" ;
-      result += " name=\"" ;
-      result += this->getSwitchName();
-      result += "\"" ;
-      result += " pin=\"" ;
-      result += this->getSwitchPin();
-      result += "\"" ;
-      result += " state=\"" ;
-      result += this->getSwitchStringState();
-      result += "\"" ;
-      result += "/>";
-      return result  ;
+      sprintf(switchConfiguration, "\n\t\t\t\t<Switch uuid=\"%s\" name=\"%s\" pin=\"%s\" state=\"%s\"/>", this->switchUUID.c_str(), this->switchName.c_str(), String(this->switchPin).c_str() , (this->getSwitchStringState()).c_str());
+      Serial.println(switchConfiguration);
+      return switchConfiguration  ;
     }
+
+
+    //    String getConfig() {
+    //      String result = "\n\t\t\t\t<Switch";
+    //      result += " uuid=\"" ;
+    //      result += this->getSwitchUUID();
+    //      result += "\"" ;
+    //      result += " name=\"" ;
+    //      result += this->getSwitchName();
+    //      result += "\"" ;
+    //      result += " pin=\"" ;
+    //      result += this->getSwitchPin();
+    //      result += "\"" ;
+    //      result += " state=\"" ;
+    //      result += this->getSwitchStringState();
+    //      result += "\"" ;
+    //      result += "/>";
+    //      return result  ;
+    //    }
 
   protected:
     String switchUUID;
@@ -108,6 +116,7 @@ class Switch : public UUIDable
     boolean normallyOpen;
     boolean switchState = SWITCH_OFF;
     int    EEPROMaddress;
+
 };
 
 

@@ -4,6 +4,7 @@
 
 
 enum  SensorType {LIGHT, THERMAL, GASCO, GASCO2, HUMIDITY, MOCK};
+static char sensorConfiguration[128];
 
 class Sensor :  public UUIDable {
   public:
@@ -33,24 +34,29 @@ class Sensor :  public UUIDable {
       return this->sensorName;
     }
 
-
-
     String getConfig() {
-      String result = "\n\t\t\t\t<Sensor uuid=\"" ;
-      result += this->sensorUUID;
-      result += "\"" ;
-      result += " name=\"" ;
-      result += this->sensorName;
-      result += "\"" ;
-      result += " pin=\"" ;
-      result += this->sensorPin;
-      result += "\"" ;
-      result += " pin=\"" ;
-      result += this->read();
-      result += "\"" ;
-      result += "/>";
-      return result  ;
+      sprintf(sensorConfiguration, "\n\t\t\t\t<Sensor uuid=\"%s\" name=\"%s\" pin=\"%s\" data=\"%s\"/>", this->sensorUUID.c_str(), this->sensorName.c_str(), String(this->sensorPin).c_str() , (this->read()).c_str());
+      Serial.println(sensorConfiguration);
+      return sensorConfiguration  ;
     }
+
+
+//    String getConfig() {
+//      String result = "\n\t\t\t\t<Sensor uuid=\"" ;
+//      result += this->sensorUUID;
+//      result += "\"" ;
+//      result += " name=\"" ;
+//      result += this->sensorName;
+//      result += "\"" ;
+//      result += " pin=\"" ;
+//      result += this->sensorPin;
+//      result += "\"" ;
+//      result += " data=\"" ;
+//      result += this->read();
+//      result += "\"" ;
+//      result += "/>";
+//      return result  ;
+//    }
 
     String read() {
       String result;

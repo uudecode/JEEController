@@ -32,6 +32,29 @@ import java.io.StringWriter;
 @WebServlet(name = "Status", urlPatterns = "/getStatus")
 public class StatusServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(StatusServlet.class);
+    private static final String XSLT = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+            "<xsl:stylesheet\n" +
+            "        xmlns:xsl=\n" +
+            "                \"http://www.w3.org/1999/XSL/Transform\"\n" +
+            "        version=\"1.0\"\n" +
+            ">\n" +
+            "    <xsl:output method=\"html\"/>\n" +
+            "    <xsl:template match=\"/\">\n" +
+            "        <xsl:apply-templates/>\n" +
+            "    </xsl:template>\n" +
+            "\n" +
+            "    <xsl:template match=\"/Homestead\">\n" +
+            "        <div class=\"row\">\n" +
+            "\n" +
+            "            <div class=\"col s12 m6 teal lighten-2\">\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:value-of select=\"@name\"/>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "        </div>\n" +
+            "    </xsl:template>\n" +
+            "\n" +
+            "</xsl:stylesheet>";
 
     @EJB(name = "ControllerEJB")
     ControllerBean controller;
@@ -58,12 +81,12 @@ public class StatusServlet extends HttpServlet {
 
         try {
             Document answerXML = stringToDom(answerFromHomestead);
-            logger.debug("Answer parsed: {}", answerXML);
+            logger.debug("Answer parsed!");
             try {
                 StringWriter outWriter = new StringWriter();
                 StreamResult result = new StreamResult(outWriter);
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Source stylesheetSource = new StreamSource(new StringReader(""));
+                Source stylesheetSource = new StreamSource(new StringReader(XSLT));
                 Transformer transformer = transformerFactory.newTransformer(stylesheetSource);
                 transformer.setOutputProperty("indent","yes");
                 transformer.transform(new DOMSource(answerXML), result);
@@ -79,7 +102,7 @@ public class StatusServlet extends HttpServlet {
 
         } catch (Exception e) {
             logger.error("Can't parse answer as XML, got error: {}", e.getMessage());
-            status = "<h1 class=\"header center orange-text\">Error parsing XML</h1>" + answerFromHomestead;
+            status = "<h1 class=\"header center orange-text\">Error parsing XML</h1>" + e.getMessage() + answerFromHomestead;
         }
 
         // Write the response message, in an HTML page
