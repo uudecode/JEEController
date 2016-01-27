@@ -34,29 +34,27 @@ class Sensor :  public UUIDable {
       return this->sensorName;
     }
 
-    String getConfig() {
-      sprintf(sensorConfiguration, "\n\t\t\t\t<Sensor uuid=\"%s\" name=\"%s\" pin=\"%s\" data=\"%s\"/>", this->sensorUUID.c_str(), this->sensorName.c_str(), String(this->sensorPin).c_str() , (this->read()).c_str());
-      Serial.println(sensorConfiguration);
-      return sensorConfiguration  ;
-    }
-
-
-//    String getConfig() {
-//      String result = "\n\t\t\t\t<Sensor uuid=\"" ;
-//      result += this->sensorUUID;
-//      result += "\"" ;
-//      result += " name=\"" ;
-//      result += this->sensorName;
-//      result += "\"" ;
-//      result += " pin=\"" ;
-//      result += this->sensorPin;
-//      result += "\"" ;
-//      result += " data=\"" ;
-//      result += this->read();
-//      result += "\"" ;
-//      result += "/>";
-//      return result  ;
+//    int getConfig(char (&str)[3072], int begin) {
+//      //      sprintf(sensorConfiguration, "\n\t\t\t\t<Sensor uuid=\"%s\" name=\"%s\" pin=\"%s\" data=\"%s\"/>", this->sensorUUID.c_str(), this->sensorName.c_str(), String(this->sensorPin).c_str() , (this->read()).c_str());
+//      //      return appendX(str, begin,sensorConfiguration);
+//      return begin;
 //    }
+
+    int getConfig(char (&str)[3072], int begin) {
+      int nextPos = begin;
+      nextPos = appendX(str, nextPos, "\n\t\t\t\t<Sensor uuid=\"");
+      nextPos = appendX(str, nextPos, this->sensorUUID);
+      nextPos = appendX(str, nextPos, F("\" name=\""));
+      nextPos = appendX(str, nextPos, this->sensorName);
+      nextPos = appendX(str, nextPos, F("\" pin=\""));
+      nextPos = appendX(str, nextPos, String(this->sensorPin));
+      nextPos = appendX(str, nextPos, F("\" data=\""));
+      nextPos = appendX(str, nextPos, this->read());
+      nextPos = appendX(str, nextPos, F("\"/>"));
+
+      return nextPos;
+
+    }
 
     String read() {
       String result;

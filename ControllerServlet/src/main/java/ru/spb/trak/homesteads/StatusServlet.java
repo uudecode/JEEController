@@ -32,7 +32,7 @@ import java.io.StringWriter;
 @WebServlet(name = "Status", urlPatterns = "/getStatus")
 public class StatusServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(StatusServlet.class);
-    private static final String XSLT = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" +
+    private static final String XSLT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<xsl:stylesheet\n" +
             "        xmlns:xsl=\n" +
             "                \"http://www.w3.org/1999/XSL/Transform\"\n" +
@@ -43,16 +43,96 @@ public class StatusServlet extends HttpServlet {
             "        <xsl:apply-templates/>\n" +
             "    </xsl:template>\n" +
             "\n" +
-            "    <xsl:template match=\"/Homestead\">\n" +
+            "    <xsl:template match=\"/Homestead/Locations/Location/Switches/Switch\">\n" +
+            "        <div class=\"row\">\n" +
+            "\n" +
+            "            <div class=\"col s12 m6 l3 brown lighten-4\">\n" +
+            "                <xsl:attribute name=\"id\">\n" +
+            "                    <xsl:value-of select=\"@uuid\"/>\n" +
+            "                </xsl:attribute>\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:value-of select=\"@name\"/>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "            <div >\n" +
+            "                <xsl:attribute name=\"class\">\n" +
+            "                    <xsl:if test=\"@state ='ON'\">col s12 m3 l2 green darken-4</xsl:if>\n" +
+            "                    <xsl:if test=\"@state ='OFF'\">col s12 m3 l2 red lighten-2</xsl:if>\n" +
+            "                </xsl:attribute>\n" +
+            "                <xsl:attribute name=\"id\">lbl_<xsl:value-of select=\"@uuid\"/></xsl:attribute>\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:attribute name=\"id\">lbl_spn_<xsl:value-of select=\"@uuid\"/></xsl:attribute>\n" +
+            "                    <xsl:if test=\"@state ='ON'\">ВКЛЮЧЕН</xsl:if>\n" +
+            "                    <xsl:if test=\"@state ='OFF'\">ВЫКЛЮЧЕН</xsl:if>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "            <div>\n" +
+            "                <xsl:attribute name=\"class\">\n" +
+            "                    <xsl:if test=\"@state ='ON'\">col s12 m3 l1 waves-effect waves-light btn red</xsl:if>\n" +
+            "                    <xsl:if test=\"@state ='OFF'\">col s12 m3 l1 waves-effect waves-light btn green</xsl:if>\n" +
+            "                </xsl:attribute>\n" +
+            "                <xsl:attribute name=\"id\">btn_<xsl:value-of select=\"@uuid\"/></xsl:attribute>\n" +
+            "                <a class=\"flow-text\">\n" +
+            "                    <xsl:attribute name=\"id\">btn_spn_<xsl:value-of select=\"@uuid\"/></xsl:attribute>\n" +
+            "                    <xsl:attribute name=\"state\"><xsl:value-of select=\"@state\"/></xsl:attribute>\n" +
+            "                    <xsl:attribute name=\"onclick\">turn(\"<xsl:value-of select=\"@uuid\"/>\",this.getAttribute(\"state\"));</xsl:attribute><xsl:if test=\"@state ='ON'\">ВЫКЛЮЧИТЬ</xsl:if><xsl:if test=\"@state ='OFF'\">ВКЛЮЧИТЬ</xsl:if></a>\n" +
+            "            </div>\n" +
+            "        </div>\n" +
+            "    </xsl:template>\n" +
+            "\n" +
+            "\n" +
+            "    <xsl:template match=\"/Homestead/Locations/Location/Sensors/Sensor\">\n" +
+            "        <div class=\"row\">\n" +
+            "\n" +
+            "            <div class=\"col s12 m6 l3 blue-grey lighten-4\">\n" +
+            "                <xsl:attribute name=\"id\">\n" +
+            "                    <xsl:value-of select=\"@uuid\"/>\n" +
+            "                </xsl:attribute>\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:value-of select=\"@name\"/>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "            <div class=\"col s12 m3 l3 deep-orange accent-1\">\n" +
+            "                <xsl:attribute name=\"id\">\n" +
+            "                    <xsl:value-of select=\"@uuid\"/>\n" +
+            "                </xsl:attribute>\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:value-of select=\"@data\"/>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "\n" +
+            "        </div>\n" +
+            "    </xsl:template>\n" +
+            "\n" +
+            "    <xsl:template match=\"/Homestead/Locations/Location\">\n" +
             "        <div class=\"row\">\n" +
             "\n" +
             "            <div class=\"col s12 m6 teal lighten-2\">\n" +
+            "                <xsl:attribute name=\"id\">\n" +
+            "                    <xsl:value-of select=\"@uuid\"/>\n" +
+            "                </xsl:attribute>\n" +
             "                <span class=\"flow-text\">\n" +
             "                    <xsl:value-of select=\"@name\"/>\n" +
             "                </span>\n" +
             "            </div>\n" +
             "        </div>\n" +
+            "        <xsl:apply-templates select=\"./Sensors/Sensor\"/>\n" +
+            "        <xsl:apply-templates select=\"./Switches/Switch\"/>\n" +
             "    </xsl:template>\n" +
+            "\n" +
+            "    <xsl:template match=\"/Homestead\">\n" +
+            "        <div class=\"row\">\n" +
+            "\n" +
+            "            <div class=\"col s12 m6 blue lighten-2\">\n" +
+            "                <span class=\"flow-text\">\n" +
+            "                    <xsl:value-of select=\"@name\"/>\n" +
+            "                </span>\n" +
+            "            </div>\n" +
+            "        </div>\n" +
+            "        <xsl:apply-templates select=\"./Locations/Location\"/>\n" +
+            "    </xsl:template>\n" +
+            "\n" +
+            "\n" +
             "\n" +
             "</xsl:stylesheet>";
 

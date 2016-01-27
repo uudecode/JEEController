@@ -123,6 +123,25 @@ public class ControllerBean {
 
     }
 
+    public String turnSwitch(String uuid,String state) {
+        String command = "turn" + (state.equals("ON")? "On:" : "Off:") + uuid + "\n";
+        String result = new String();
+        try {
+            sendCommand(command);
+        } catch (Exception e) {
+            logger.error("Can't send command: {}, got error: {}",command, e.getMessage());
+        }
+
+        try {
+            result = receiveAnswer();
+        } catch (Exception e) {
+            logger.error("Can't receive answer, got error: {}", e.getMessage());
+        }
+        logger.debug(result);
+
+        return result;
+    }
+
     @Remove
     @PreDestroy
     public void closeAll() {

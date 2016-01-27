@@ -36,7 +36,7 @@ class WiFiController : public Debuggable {
 
     String getCommand () {
       if (!wifi.kick()) {
-        Serial.print("ESP8266 look's dead :( \r\n");
+        Serial.print(F("ESP8266 look's dead :( \r\n"));
         begin();
       }
 
@@ -53,35 +53,48 @@ class WiFiController : public Debuggable {
       return command;
     }
 
-    void putAnswer(String const &answer) {
+    void putAnswer(char (&answer)[3072]) {
       int sendSize = 0;
-      int answerLength = answer.length();
+      int answerLength = getEOSposition(answer);
+
       int sendBufferSize = sizeof(sendBuffer);
       int iterations = (1 + ((answerLength - 1) / sendBufferSize));
       if (0 == (answerLength % sendBufferSize))
         iterations += 1;
+      for (int i = 0; i < sendBufferSize; i++)
+        sendBuffer[i] = '\0';
 
-      Serial.println("answer=[" + answer + "] answerLength=[" + String(answerLength) + "] sendBufferSize=[" + String(sendBufferSize) + "] iterations: " + String(iterations));
+
+      //      Serial.println("answerLength=[" + String(answerLength) + F("] sendBufferSize=[") + String(sendBufferSize) + F("] iterations: ") + String(iterations));
+      //      Serial.println(F("---"));
+      //      for (int z = 0; z < answerLength; z++) {
+      //        Serial.print(answer[z]);
+      //      }
+      //      Serial.println(F("---"));
 
       for (int x = 0; x < iterations  ; x++) {
-        (answer.substring(x * sendBufferSize, (x * sendBufferSize) + sendBufferSize )).toCharArray(sendBuffer, sendBufferSize + 1);
-        //Serial.print(answer.substring(x * sendBufferSize, (x * sendBufferSize) + sendBufferSize ));
-        //        Serial.println(sendBuffer);
-        Serial.println("Iteration: " + String(x) + " answerLength % sendBufferSize: [" + String(answerLength % sendBufferSize) + "] answerLength: [" + String (answerLength) + "] sendBufferSize: [" + String(sendBufferSize) + "]");
-
         if (x < (iterations - 1))
           sendSize = sendBufferSize;
         else
           sendSize = (answerLength % sendBufferSize);
 
-
-        Serial.println("sendSize: " + String(sendSize));
+        for (int z = 0 ; z < sendSize ; z++) {
+          sendBuffer[z] = answer[z + (x * sendBufferSize)];
+        }
+        //      Serial.println(F("--+--"));
+        // Serial.println(sendBuffer);
+        //  for (int z = 0; z < sendSize; z++) {
+        //      Serial.print(sendBuffer[z]);
+        //      }
+        //        Serial.println(F("--+--"));
+        //        Serial.println("Iteration: " + String(x) + " answerLength % sendBufferSize: [" + String(answerLength % sendBufferSize) + "] answerLength: [" + String (answerLength) + "] sendBufferSize: [" + String(sendBufferSize) + "]");
+        //        Serial.println("sendSize: " + String(sendSize));
         if (0 < sendSize) {
           wifi.send((const uint8_t*)sendBuffer, sendSize);
         }
       }
 
- 
+
     }
   private:
     String controllerAdress;
@@ -91,7 +104,7 @@ class WiFiController : public Debuggable {
     char networkName[30];
     char networkPassword[20];
     char command[64];
-    char sendBuffer[256];
+    char sendBuffer[64];
 
 
 
@@ -126,7 +139,7 @@ class WiFiController : public Debuggable {
           isConnected = true;
         }
       }
-      debug(isConnected ? "Connected to controller" : "No controller connection" );
+      debug(isConnected ? F("Connected to controller") : F("No controller connection") );
       return isConnected;
     }
 
@@ -149,10 +162,24 @@ class WiFiController : public Debuggable {
             }
         }
       }
-      debug(isConnected ? "Connected to WAN" : "No WAN connection" );
+      debug(isConnected ? F("Connected to WAN") : F("No WAN connection") );
       return isConnected;
     };
+
+    int getEOSposition(const char *array)
+    {
+      int result = -1;
+      for (int i = 0; i <= 3072; i++) {
+        if (array[i] == '\0') {
+          result = i;
+          break;
+        }
+
+      }
+      return result;
+    }
 };
+
 
 
 #endif

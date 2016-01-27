@@ -6,10 +6,14 @@ class Yard : public Location {
   public:
     Yard() : Location("Двор") {};
 
-    String getConfig() {
-      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
-      return result  ;
+
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
     }
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
 
     boolean setSwitch(String switchUUID, boolean toState) {
       return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
@@ -33,11 +37,14 @@ class Barn : public Location {
 
   public:
     Barn() : Location("Папин домик") {};
-
-    String getConfig() {
-      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
-      return result  ;
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
     }
+
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
 
     boolean setSwitch(String switchUUID, boolean toState) {
       return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
@@ -54,10 +61,13 @@ class Sauna : public Location {
   public:
     Sauna() : Location("Парилка") {};
 
-    String getConfig() {
-      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
-      return result  ;
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
     }
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
 
     boolean setSwitch(String switchUUID, boolean toState) {
       return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
@@ -74,11 +84,13 @@ class Sauna : public Location {
 class WashingRoom : public Location {
   public:
     WashingRoom() : Location("Моечная") {};
-
-    String getConfig() {
-      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
-      return result  ;
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
     }
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
 
     boolean setSwitch(String switchUUID, boolean toState) {
       return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
@@ -89,6 +101,54 @@ class WashingRoom : public Location {
                          };
     Sensor sensors[2] = {Sensor(MOCK, 25, "Показания CO в моечной")
                          , Sensor(THERMAL, 26, "Температура в моечной")
+                        };
+};
+
+class FirstFloor : public Location {
+  public:
+    FirstFloor() : Location("Первый этаж") {};
+
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    }
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
+
+    boolean setSwitch(String switchUUID, boolean toState) {
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
+    }
+
+  protected:
+    Switch switches[2] = {Switch(24,  "Освещение на первом этаже", false, false )
+                          , Switch(24,  "Отопление", false, false )
+                         };
+    Sensor sensors[1] = { Sensor(THERMAL, 26, "Температура на первом этаже")
+                        };
+};
+
+class SecondFloor : public Location {
+  public:
+    SecondFloor() : Location("Второй этаж") {};
+
+    int getConfig(char (&str)[3072], int begin) {
+      return Location::getConfig(str, begin, switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    }
+    //    String getConfig() {
+    //      String result = Location::getConfig(switches, (sizeof(switches) / sizeof(Switch)), sensors, (sizeof(sensors) / sizeof(Sensor)));
+    //      return result  ;
+    //    }
+
+    boolean setSwitch(String switchUUID, boolean toState) {
+      return Location::setSwitch(switches, (sizeof(switches) / sizeof(Switch)), switchUUID, toState);
+    }
+
+  protected:
+    Switch switches[2] = {Switch(24,  "Освещение на втором этаже", false, false )
+                          , Switch(24,  "Отопление", false, false )
+                         };
+    Sensor sensors[1] = { Sensor(THERMAL, 26, "Температура на втором этаже")
                         };
 };
 

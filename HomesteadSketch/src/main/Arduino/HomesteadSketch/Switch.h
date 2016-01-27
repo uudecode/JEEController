@@ -11,7 +11,7 @@
 #define SWITCH_ON true
 #endif
 
-static char switchConfiguration[128];
+//static char switchConfiguration[128];
 
 class Switch : public UUIDable
 {
@@ -70,44 +70,38 @@ class Switch : public UUIDable
     }
 
 
-    inline void turnOn() {
+    void turnOn() {
       Serial.println(" to ON " + this->switchUUID);
       this->switchState = SWITCH_ON;
       digitalWrite(this->switchPin, ((this->switchState) ? HIGH : LOW));
       EEPROM.write(this->EEPROMaddress, B00000010 + ((this->switchState) ? B00000001 : B00000000));
     }
 
-    inline void turnOff() {
+    void turnOff() {
       Serial.println(" to OFF " + this->switchUUID);
       this->switchState = SWITCH_OFF;
       digitalWrite(this->switchPin, ((this->switchState) ? HIGH : LOW));
       EEPROM.write(this->EEPROMaddress, B00000010 + ((this->switchState) ? B00000001 : B00000000));
     }
 
-    String getConfig() {
-      sprintf(switchConfiguration, "\n\t\t\t\t<Switch uuid=\"%s\" name=\"%s\" pin=\"%s\" state=\"%s\"/>", this->switchUUID.c_str(), this->switchName.c_str(), String(this->switchPin).c_str() , (this->getSwitchStringState()).c_str());
-      Serial.println(switchConfiguration);
-      return switchConfiguration  ;
+
+    int getConfig(char (&str)[3072], int begin) {
+      int nextPos = begin;
+      nextPos = appendX(str, nextPos, "\n\t\t\t\t<Switch uuid=\"");
+      nextPos = appendX(str, nextPos, this->switchUUID);
+      nextPos = appendX(str, nextPos, F("\" name=\""));
+      nextPos = appendX(str, nextPos, this->switchName);
+      nextPos = appendX(str, nextPos, F("\" pin=\""));
+      nextPos = appendX(str, nextPos, String(this->switchPin));
+      nextPos = appendX(str, nextPos, F("\" state=\""));
+      nextPos = appendX(str, nextPos, this->getSwitchStringState());
+      nextPos = appendX(str, nextPos, F("\"/>"));
+
+      return nextPos;
+
     }
 
 
-    //    String getConfig() {
-    //      String result = "\n\t\t\t\t<Switch";
-    //      result += " uuid=\"" ;
-    //      result += this->getSwitchUUID();
-    //      result += "\"" ;
-    //      result += " name=\"" ;
-    //      result += this->getSwitchName();
-    //      result += "\"" ;
-    //      result += " pin=\"" ;
-    //      result += this->getSwitchPin();
-    //      result += "\"" ;
-    //      result += " state=\"" ;
-    //      result += this->getSwitchStringState();
-    //      result += "\"" ;
-    //      result += "/>";
-    //      return result  ;
-    //    }
 
   protected:
     String switchUUID;
