@@ -8,6 +8,8 @@
 #ifndef WIFICONTROLLER_H
 #define WIFICONTROLLER_H
 
+// Pin 42 for flasher!
+
 const char ssid_0[] PROGMEM = "SBT";
 const char pass_0[] PROGMEM = "sbertech123456";
 const char ssid_1[] PROGMEM = "TRAK.SPB.RU";
@@ -23,6 +25,7 @@ ESP8266 wifi (Serial1);
 class WiFiController : public Debuggable {
 
   public:
+    Flasher wifiFlasher = Flasher(42, 2000, 2000);
     WiFiController(String controllerAdress, uint32_t controllerPort) {
       this->controllerAdress = controllerAdress;
       this->controllerPort = controllerPort;
@@ -42,7 +45,7 @@ class WiFiController : public Debuggable {
 
       checkConnect();
       uint8_t buffer[128] = {0};
-      uint32_t len = wifi.recv(buffer, sizeof(buffer), 1000);
+      uint32_t len = wifi.recv(buffer, sizeof(buffer), 200);
       String command;
 
       if (len > 0) {
@@ -111,9 +114,11 @@ class WiFiController : public Debuggable {
     void checkConnect() {
       if (-1 == (wifi.getIPStatus().indexOf("CIPSTATUS:0,\"TCP\"")) ) {
         Serial.println(F("No connect to controller."));
+        wifiFlasher.setTimes(1000, 1000);
         //        debug(wifi.getLocalIP());
         if ((wifi.getLocalIP()).equals("\"0.0.0.0\"")) {
           //          debug(F("Need connect to wifi"));
+          wifiFlasher.setTimes(2000, 2000);
           connectedToWAN = tryConnectToWAN();
         }
         else {
@@ -137,6 +142,8 @@ class WiFiController : public Debuggable {
       for (int attempts = 3; attempts > 0 ; attempts --) {
         if (wifi.createTCP(controllerAdress, controllerPort)) {
           isConnected = true;
+          wifiFlasher.setTimes(10000, 0);
+
         }
       }
       debug(isConnected ? F("Connected to controller") : F("No controller connection") );

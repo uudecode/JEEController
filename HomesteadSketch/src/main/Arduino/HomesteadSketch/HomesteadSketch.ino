@@ -19,6 +19,8 @@
 
 
 WiFiController wifiController = WiFiController("93.100.131.244", 37001);
+
+
 const char homesteadName[] PROGMEM = "Дача";
 
 
@@ -54,9 +56,11 @@ void setup() {
   getConfig();
   Serial.println(configuration);
   wifiController.begin();
+
 }
 
 void loop() {
+  wifiController.wifiFlasher.update();
   String command;
   command = wifiController.getCommand();
   if (0 < command.length()) {
@@ -86,6 +90,7 @@ void loop() {
     //    }
     sprintf(configuration, "UNKNOWN COMMAND:%s\n", command.c_str());
     wifiController.putAnswer(configuration);
+
   }
 
 }
@@ -109,7 +114,7 @@ String switchCommand(String command, boolean toState) {
                          || washingRoom.setSwitch(uuid, toState)
                          || firstFloor.setSwitch(uuid, toState)
                          || secondFloor.setSwitch(uuid, toState));
-    result = (preResult ? "OK:" : "FAULT:") + uuid + (toState ? ":ON\n":":OFF\n");
+    result = (preResult ? "OK:" : "FAULT:") + uuid + (toState ? ":ON\n" : ":OFF\n");
   }
 
 

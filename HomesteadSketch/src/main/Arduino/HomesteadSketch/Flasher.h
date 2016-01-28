@@ -45,9 +45,12 @@ class Flasher : public Debuggable
     previousMillis = 0;
      debug(flasherName + " Initiated");
   }
-  
+      void setTimes (long on, long off) {
+      OnTime = on;
+      OffTime = off;
+    }
  
-  void Update()
+  void update()
   {
     // check to see if it's time to change the state of the LED
     unsigned long currentMillis = millis();
@@ -57,13 +60,13 @@ class Flasher : public Debuggable
       ledState = LOW;  // Turn it off
       previousMillis = currentMillis;  // Remember the time
       digitalWrite(ledPin, ledState);  // Update the actual LED
-      debug(flasherName + " OFF");
+      //debug(flasherName + " OFF");
     }
     else if ((ledState == LOW) && (currentMillis - previousMillis >= OffTime))
     {
       ledState = HIGH;  // turn it on
       previousMillis = currentMillis;   // Remember the time
-      debug(flasherName + " ON");      
+      //debug(flasherName + " ON");      
       digitalWrite(ledPin, ledState);   // Update the actual LED
     }
   }
