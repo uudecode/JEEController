@@ -1,5 +1,9 @@
 #define DEBUG_ON
 
+#include "SPI.h"
+#include "UTouch.h"
+#include "UTFT.h"
+#define FLASH_CS_PIN 45
 
 #include <avr/pgmspace.h>
 #include "Flasher.h"
@@ -16,15 +20,28 @@
 #define SWITCH_ON true
 #endif
 
+//Font selection
+//BVS= Bitstream vera sans, suffix = font size in pixel (height)
+#define BVS_13 10
+#define BVS_15 12
+#define BVS_19 14
+#define BVS_22 18
+#define BVS_28 22
+#define BVS_34 28
+#define BVS_43 38
+#define BVS_52 53
+#define BVS_74 78
+#define BVS_112 122
 
-
-WiFiController wifiController = WiFiController("93.100.131.244", 37001);
-
+WiFiController wifiController ("93.100.131.244", 37001);
+UTouch      myTouch(6, 5, 4, 3, 2);
+UTFT myGLCD(CTE32_480X320, 38, 39, 40, 41);
+extern uint8_t SmallFont[];
 
 const char homesteadName[] PROGMEM = "Дача";
 
 
-Yard yard =  Yard();
+Yard yard = Yard();
 Barn barn =  Barn();
 Sauna sauna =  Sauna();
 WashingRoom washingRoom =  WashingRoom();
@@ -32,6 +49,7 @@ FirstFloor firstFloor =  FirstFloor();
 SecondFloor secondFloor =  SecondFloor();
 char configuration[3072];
 int nextPosition;
+String myStatus;
 
 void getConfig() {
   //  sprintf(configuration,"<Homestead name =\"%s\">\n\t<Locations>%s%s%s%s\n\t</Locations>\n</Homestead>\n",copyToString(homesteadName).c_str(),(yard.getConfig()).c_str(),(barn.getConfig()).c_str(),(sauna.getConfig()).c_str(), (washingRoom.getConfig()).c_str() );
@@ -45,22 +63,49 @@ void getConfig() {
   nextPosition = secondFloor.getConfig(configuration, nextPosition);
   nextPosition = appendX(configuration, nextPosition, F("\n\t</Locations>\n</Homestead>\n"));
   configuration[nextPosition] = '\0';
-  Serial.println("In getConfig() nextPosition is:" + String(nextPosition));
-
 }
 
 void setup() {
+  delay(1000);
   Serial.begin(115200);
   Serial.println("Initializing " + copyToString(homesteadName));
   randomSeed(analogRead(0));
+  myGLCD.SPI_Flash_init(FLASH_CS_PIN);
+  SPI.begin();
+  SPI.setClockDivider(SPI_CLOCK_DIV2);
+  myTouch.InitTouch();
+  myTouch.setPrecision(PREC_EXTREME);
+  delay(500);
   getConfig();
   Serial.println(configuration);
   wifiController.begin();
+  myGLCD.InitLCD();
+  myGLCD.setFont(SmallFont);
+  myGLCD.setColor(0, 0, 0);
+  myGLCD.setBackColor(0, 0, 0);
+  myGLCD.fillRect(0, 0, 480, 320);
+  
 
 }
 
 void loop() {
+  myStatus = (wifiController.connectedToWAN ? String("WiFi: ") + wifiController.networkName : "WiFi: None") + " "+  (wifiController.connectedToController ? wifiController.controllerAdress + ":" + String(wifiController.controllerPort): "No controller")+ " " +String(millis()) + "ms";
+  myGLCD.setColor(255, 255, 255);
+  myGLCD.print(myStatus, 0, 280);
+  myGLCD.print("last command: " + String(wifiController.command), 0, 3000);
+  
   wifiController.wifiFlasher.update();
+  myTouch.read();
+  if (myTouch.dataAvailable()) {
+    Serial.println("Data available");
+    int x = myTouch.getX();
+    int y = myTouch.getY();
+    Serial.print(x);
+    Serial.print(",");
+    Serial.println(y);
+  }
+
+
   String command;
   command = wifiController.getCommand();
   if (0 < command.length()) {

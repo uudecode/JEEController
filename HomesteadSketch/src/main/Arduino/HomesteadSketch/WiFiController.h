@@ -8,7 +8,8 @@
 #ifndef WIFICONTROLLER_H
 #define WIFICONTROLLER_H
 
-// Pin 42 for flasher!
+
+#define FLASHER_PIN 42
 
 const char ssid_0[] PROGMEM = "SBT";
 const char pass_0[] PROGMEM = "sbertech123456";
@@ -25,7 +26,15 @@ ESP8266 wifi (Serial1);
 class WiFiController : public Debuggable {
 
   public:
-    Flasher wifiFlasher = Flasher(42, 2000, 2000);
+    Flasher wifiFlasher = Flasher(FLASHER_PIN, 2000, 2000);
+    boolean connectedToWAN = false;
+    boolean connectedToController = false;
+    char networkName[30];
+    String controllerAdress;
+    long controllerPort;
+    char command[64];
+
+
     WiFiController(String controllerAdress, uint32_t controllerPort) {
       this->controllerAdress = controllerAdress;
       this->controllerPort = controllerPort;
@@ -99,14 +108,10 @@ class WiFiController : public Debuggable {
 
 
     }
+
+
   private:
-    String controllerAdress;
-    long controllerPort;
-    boolean connectedToWAN = false;
-    boolean connectedToController = false;
-    char networkName[30];
     char networkPassword[20];
-    char command[64];
     char sendBuffer[64];
 
 
@@ -117,7 +122,7 @@ class WiFiController : public Debuggable {
         wifiFlasher.setTimes(1000, 1000);
         //        debug(wifi.getLocalIP());
         if ((wifi.getLocalIP()).equals("\"0.0.0.0\"")) {
-          //          debug(F("Need connect to wifi"));
+                    debug(F("Need connect to wifi"));
           wifiFlasher.setTimes(2000, 2000);
           connectedToWAN = tryConnectToWAN();
         }
@@ -150,24 +155,20 @@ class WiFiController : public Debuggable {
       return isConnected;
     }
 
-    boolean tryConnectToWAN() { // 3 times to every net.
+    boolean tryConnectToWAN() { 
       boolean isConnected = false;
-      String listAp = wifi.getAPList();
       for ( int i = 0 ; (i < (sizeof(ssids) / sizeof(*ssids)) && !isConnected) ; i += 2) {
 
         strcpy_P(networkName, (char*)pgm_read_word(&(ssids[i])));
         strcpy_P(networkPassword, (char*)pgm_read_word(&(ssids[i + 1])));
         int attempts = 3;
 
-        for (int attempts = 3; attempts > 0 ; attempts --) {
-          if (0 < listAp.indexOf("\"" + String(networkName) + "\""))
             if (!wifi.joinAP(networkName, networkPassword) ) {
               delay(100);
             } else {
               isConnected = true;
               break;
             }
-        }
       }
       debug(isConnected ? F("Connected to WAN") : F("No WAN connection") );
       return isConnected;
