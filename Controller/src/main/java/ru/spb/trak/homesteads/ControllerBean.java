@@ -34,7 +34,9 @@ public class ControllerBean {
 
     public ControllerBean() throws Exception {
         logger.debug("Starting bean");
-        checkConnect();
+        try {
+            checkConnect();
+        }catch (Exception ignoreException){};
         logger.info("Bean started");
     }
 
