@@ -9,6 +9,7 @@ import javax.ejb.Remove;
 import javax.ejb.Singleton;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -33,15 +34,7 @@ public class ControllerBean {
     private static BufferedReader inFromClient = null;
 
     public ControllerBean() throws Exception {
-        logger.debug("Starting bean");
-        try {
-            checkConnect();
-        }catch (Exception ignoreException){};
-        logger.info("Bean started");
-    }
-
-    private void checkConnect() throws Exception {
-        if (null == controlServerSocket || controlServerSocket.isClosed())
+        logger.debug("Starting bean");        if (null == controlServerSocket || controlServerSocket.isClosed())
             try {
                 controlServerSocket = new ServerSocket(PORT_NUMBER);
                 controlServerSocket.setSoTimeout(SERVER_SOCKET_TIMEOUT);
@@ -52,20 +45,29 @@ public class ControllerBean {
                 logger.error(message);
                 throw new Exception(message);
             }
+        logger.info("Bean started");
+    }
 
+    private void closeControlSocket() {
+        try {
+            controlSocket.close();
+            logger.debug("controlSocket closed.");
+        }catch (Exception ignoredException) {
+            logger.error("Can't close socket, gor error: {}",ignoredException.getMessage());
+        }
+    }
+
+
+    private void checkConnect() throws Exception {
         printControlSocketInfo();
         if (null == controlSocket || !controlSocket.isConnected() || controlSocket.isClosed()) {
             try {
                 logger.debug("controlSocket is closed or not connected etc..");
                 controlSocket = controlServerSocket.accept();
                 controlSocket.setSoTimeout(SOCKET_TIMEOUT);
+                logger.debug("got new controlSocket");
                 printControlSocketInfo();
-                if (null == outToClient) {
-                    outToClient = new DataOutputStream(controlSocket.getOutputStream());
-                }
-                if (null == inFromClient) {
-                    inFromClient = new BufferedReader(new InputStreamReader(controlSocket.getInputStream(), "UTF-8"));
-                }
+                resetStreamAndReader();
 
             } catch (SocketTimeoutException timeoutException) {
                 throw new NoControlSocketException("No Arduino controller connected.");
@@ -73,20 +75,42 @@ public class ControllerBean {
         }
     }
 
+    private void resetStreamAndReader() throws IOException {
+       // if (null == outToClient) {
+            outToClient = new DataOutputStream(controlSocket.getOutputStream());
+    //    }
+    //    if (null == inFromClient) {
+            inFromClient = new BufferedReader(new InputStreamReader(controlSocket.getInputStream(), "UTF-8"));
+     //   }
+        logger.debug("Stream and Reader reset!");
+    }
+
     private void printControlSocketInfo() {
         try {
-            logger.debug("controlSocket.isConnected: {}", controlSocket.isConnected());
-            logger.debug("controlSocket.isBound: {}", controlSocket.isBound());
-            logger.debug("controlSocket.isClosed: {}", controlSocket.isClosed());
+            logger.debug("controlSocket: isConnected: {} isBound: {} isClosed: {}", controlSocket.isConnected(), controlSocket.isBound(), controlSocket.isClosed());
+            logger.debug("controlServerSocket:  isBound: {} isClosed: {}",  controlServerSocket.isBound(), controlServerSocket.isClosed());
         } catch (Exception e) {
             logger.error("Can't check controlSocket, error is: {}", e.getMessage());
         }
     }
 
-    private void sendCommand(String command) throws Exception {
-        checkConnect();
-        outToClient.write(command.getBytes(Charset.forName("UTF-8")));
-        outToClient.flush();
+    private void sendCommand(String command) /*throws Exception */{
+        try {
+            checkConnect();
+            outToClient.write(command.getBytes(Charset.forName("UTF-8")));
+            outToClient.flush();
+        } catch (Exception e ) {
+            logger.error("Can't send command: {}, got error:{}, sleep and try",command,e.getMessage());
+            try {
+                resetStreamAndReader();
+                Thread.sleep(1000);
+            }catch (Exception insomnia){};
+            sendCommand(command);
+
+
+//            outToClient.write(command.getBytes(Charset.forName("UTF-8")));
+//            outToClient.flush();
+        }
         logger.debug("Command: {} successfully sended to Arduino.", command);
     }
 

@@ -11,18 +11,19 @@
 
 #define FLASHER_PIN 42
 
-const char ssid_0[] PROGMEM = "SBT";
-const char pass_0[] PROGMEM = "sbertech123456";
-const char ssid_1[] PROGMEM = "TRAK.SPB.RU";
+const char ssid_0[] PROGMEM = "TRAK.SPB.RU";
+const char pass_0[] PROGMEM = "l7tx-zs2i-l1rd";
+const char ssid_1[] PROGMEM = "CENTER.TRAK.SPB.RU";
 const char pass_1[] PROGMEM = "l7tx-zs2i-l1rd";
-const char ssid_2[] PROGMEM = "CENTER.TRAK.SPB.RU";
+const char ssid_2[] PROGMEM = "PERI.TRAK.SPB.RU";
 const char pass_2[] PROGMEM = "l7tx-zs2i-l1rd";
-const char ssid_3[] PROGMEM = "PERI.TRAK.SPB.RU";
-const char pass_3[] PROGMEM = "l7tx-zs2i-l1rd";
 
-const char* const ssids[] PROGMEM = {ssid_0, pass_0, ssid_1, pass_1, ssid_2, pass_2, ssid_3, pass_3};
+const char* const ssids[] PROGMEM = {ssid_0, pass_0, ssid_1, pass_1, ssid_2, pass_2};
 ESP8266 wifi (Serial1);
 
+
+
+const long repeatConnectTimeOut = 6000;
 class WiFiController : public Debuggable {
 
   public:
@@ -32,7 +33,9 @@ class WiFiController : public Debuggable {
     char networkName[30];
     String controllerAdress;
     long controllerPort;
-    char command[64];
+    long lastTryConnectToWIFI = 0;
+    String lastCommand;
+
 
 
     WiFiController(String controllerAdress, uint32_t controllerPort) {
@@ -53,19 +56,24 @@ class WiFiController : public Debuggable {
       }
 
       checkConnect();
-      uint8_t buffer[128] = {0};
-      uint32_t len = wifi.recv(buffer, sizeof(buffer), 200);
-      String command;
+      if (connectedToController) {
+        uint8_t buffer[128] = {0};
+        uint32_t len = wifi.recv(buffer, sizeof(buffer), 300);
+        String command;
+        if (len > 0) {
+          for (uint32_t i = 0; i < len; i++) {
+            command += (char)buffer[i];
+          }
+          Serial.println(command);
+          lastCommand = command;
 
-      if (len > 0) {
-        for (uint32_t i = 0; i < len; i++) {
-          command += (char)buffer[i];
         }
+        return command;
       }
-      return command;
+      return "";
     }
 
-    void putAnswer(char (&answer)[3072]) {
+    void putAnswer(char (&answer)[2400]) {
       int sendSize = 0;
       int answerLength = getEOSposition(answer);
 
@@ -117,14 +125,30 @@ class WiFiController : public Debuggable {
 
 
     void checkConnect() {
-      if (-1 == (wifi.getIPStatus().indexOf("CIPSTATUS:0,\"TCP\"")) ) {
+      String IPStatus = wifi.getIPStatus();
+
+      //      Serial.println(IPStatus);
+      //releaseTCP
+      if (!(-1 == IPStatus.indexOf("STATUS:4"))) {
+        wifi.releaseTCP();
+      }
+      if (-1 == (IPStatus.indexOf("CIPSTATUS:0,\"TCP\"")) ) {
         Serial.println(F("No connect to controller."));
         wifiFlasher.setTimes(1000, 1000);
-        //        debug(wifi.getLocalIP());
-        if ((wifi.getLocalIP()).equals("\"0.0.0.0\"")) {
-                    debug(F("Need connect to wifi"));
+        String wifiLocalIP = wifi.getLocalIP();
+        //        Serial.print("wifiLocalIP=");
+        //        Serial.println(wifiLocalIP);
+        if (wifiLocalIP.equals("\"0.0.0.0\"")) {
           wifiFlasher.setTimes(2000, 2000);
-          connectedToWAN = tryConnectToWAN();
+          //                  Serial.print(" millis() - lastTryConnectToWIFI=");
+          //        Serial.println(String( millis() - lastTryConnectToWIFI));
+
+          //debug(F("Need connect to wifi, check timeout"));
+          if (( millis() - lastTryConnectToWIFI ) > repeatConnectTimeOut) {
+            debug(F("Timeout reach, try connect to WIFI"));
+            lastTryConnectToWIFI = millis();
+            connectedToWAN = tryConnectToWAN();
+          }
         }
         else {
           //          debug(F("Not need connect to wifi"));
@@ -135,7 +159,7 @@ class WiFiController : public Debuggable {
         {
           connectedToController = tryConnectToController();
         } else {
-          Serial.println(F("No connect to controller!"));
+          //Serial.println(F("No connect to controller!"));
         }
       } //else debug("Connect to controller alredy exists.");
 
@@ -155,21 +179,25 @@ class WiFiController : public Debuggable {
       return isConnected;
     }
 
-    boolean tryConnectToWAN() { 
+    boolean tryConnectToWAN() {
       boolean isConnected = false;
       for ( int i = 0 ; (i < (sizeof(ssids) / sizeof(*ssids)) && !isConnected) ; i += 2) {
 
         strcpy_P(networkName, (char*)pgm_read_word(&(ssids[i])));
         strcpy_P(networkPassword, (char*)pgm_read_word(&(ssids[i + 1])));
         int attempts = 3;
-
-            if (!wifi.joinAP(networkName, networkPassword) ) {
-              delay(100);
-            } else {
-              isConnected = true;
-              break;
-            }
+        Serial.println(networkName);
+      //  for (int j = 0 ; j < attempts ; j++)
+          if (!wifi.joinAP(networkName, networkPassword) ) {
+            wifi.restart();
+            wifi.disableMUX();
+            delay(100);
+          } else {
+            isConnected = true;
+            break;
+          }
       }
+      Serial.println(isConnected ? F("Connected to WAN") : F("No WAN connection"));
       debug(isConnected ? F("Connected to WAN") : F("No WAN connection") );
       return isConnected;
     };
@@ -177,7 +205,7 @@ class WiFiController : public Debuggable {
     int getEOSposition(const char *array)
     {
       int result = -1;
-      for (int i = 0; i <= 3072; i++) {
+      for (int i = 0; i <= 2400; i++) {
         if (array[i] == '\0') {
           result = i;
           break;

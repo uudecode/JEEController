@@ -29,13 +29,13 @@
     {\
       if (LOG_OUTPUT_DEBUG_PREFIX)\
       {\
-        Serial.print("[LOG Debug: ");\
+        Serial.print(F("[LOG Debug: "));\
         Serial.print((const char*)__FILE__);\
-        Serial.print(",");\
+        Serial.print(F(","));\
         Serial.print((unsigned int)__LINE__);\
         Serial.print(",");\
         Serial.print((const char*)__FUNCTION__);\
-        Serial.print("] ");\
+        Serial.print(F("] "));\
       }\
       Serial.print(arg);\
     }\
@@ -289,6 +289,7 @@ uint32_t ESP8266::recv(uint8_t *coming_mux_id, uint8_t *buffer, uint32_t buffer_
   return recvPkg(buffer, buffer_size, NULL, timeout, coming_mux_id);
 }
 
+
 /*----------------------------------------------------------------------------*/
 /* +IPD,<id>,<len>:<data> */
 /* +IPD,<len>:<data> */
@@ -311,13 +312,34 @@ uint32_t ESP8266::recvPkg(uint8_t *buffer, uint32_t buffer_size, uint32_t *data_
     return 0;
   }
 
-  start = millis();
-  while (millis() - start < timeout) {
-    if (m_puart->available() > 0) {
-      a = m_puart->read();
-      data += a;
-    }
 
+  /*
+     43 +
+    I 73
+    P 80
+    D 68
+    : 58
+    0 48
+    1 49
+    8 56
+    9 57
+    , 44
+  */
+  start = millis();
+  while ((millis() - start < timeout) || (m_puart->available() > 2) ) {
+    a = m_puart->read();
+    //    if (1 < a && 123 > a)
+    //      Serial.println(a);
+
+    //if ((a > 48 && a < 57) || a == 43 || a == 73 || a == 80 || a == 68 || a == 58 || a == 44 ) {
+   // if (0 < a && 123 > a) {
+      data += a;
+      //Serial.println(a);
+ //   }
+    
+   //    Serial.println("Data length: " + String(data.length())+"["+data+"]");
+
+       
     index_PIPDcomma = data.indexOf("+IPD,");
     if (index_PIPDcomma != -1) {
       index_colon = data.indexOf(':', index_PIPDcomma + 5);
@@ -345,26 +367,33 @@ uint32_t ESP8266::recvPkg(uint8_t *buffer, uint32_t buffer_size, uint32_t *data_
     }
   }
 
+//  if (has_data) {
+ //   Serial.print("\ndata=[");
+//    Serial.print(data);
+//    Serial.println("]");
+//  }// else {Serial.print("No data---");}
+
+
   if (has_data) {
     i = 0;
     ret = len > buffer_size ? buffer_size : len;
-    start = millis();
-    while (millis() - start < 3000) {
-      while (m_puart->available() > 0 && i < ret) {
-        a = m_puart->read();
-        buffer[i++] = a;
-      }
-      if (i == ret) {
-        rx_empty();
-        if (data_len) {
-          *data_len = len;
-        }
-        if (index_comma != -1 && coming_mux_id) {
-          *coming_mux_id = id;
-        }
-        return ret;
-      }
+    //   start = millis();
+    //   while (millis() - start < 3000) {
+    while (m_puart->available() > 0 && i < ret) {
+      a = m_puart->read();
+      buffer[i++] = a;
     }
+    if (i == ret) {
+      rx_empty();
+      if (data_len) {
+        *data_len = len;
+      }
+      if (index_comma != -1 && coming_mux_id) {
+        *coming_mux_id = id;
+      }
+      return ret;
+    }
+    // }
   }
   return 0;
 }
@@ -405,6 +434,9 @@ String ESP8266::recvString(String target1, String target2, uint32_t timeout)
       if (a == '\0') continue;
       data += a;
     }
+//traked
+//Serial.print(F("in recvString data:"));
+//Serial.println(data);    
     if (data.indexOf(target1) != -1) {
       break;
     } else if (data.indexOf(target2) != -1) {
@@ -450,13 +482,13 @@ bool ESP8266::recvFindAndFilter(String target, String begin, String end, String 
 {
   String data_tmp;
   data_tmp = recvString(target, timeout);
-//  Serial.println("data_tmp: [" + data_tmp + "]");
+  //Serial.println("data_tmp: [" + data_tmp + "]");
 
   if (data_tmp.indexOf(target) != -1) {
     int32_t index1 = data_tmp.indexOf(begin);
     int32_t index2 = data_tmp.indexOf(end);
-//    Serial.println("data_tmp.indexOf(begin):" + String(index1));
-//    Serial.println("data_tmp.indexOf(end):" + String(index2));
+    //    Serial.println("data_tmp.indexOf(begin):" + String(index1));
+    //    Serial.println("data_tmp.indexOf(end):" + String(index2));
     if (index1 != -1 && index2 != -1) {
       index1 += begin.length();
       data = data_tmp.substring(index1, index2);
@@ -470,21 +502,21 @@ bool ESP8266::recvFindAndFilter(String target, String begin, String end, String 
 bool ESP8266::eAT(void)
 {
   rx_empty();
-  m_puart->println("AT");
+  m_puart->println(F("AT"));
   return recvFind("OK");
 }
 
 bool ESP8266::eATRST(void)
 {
   rx_empty();
-  m_puart->println("AT+RST");
+  m_puart->println(F("AT+RST"));
   return recvFind("OK");
 }
 
 bool ESP8266::eATGMR(String &version)
 {
   rx_empty();
-  m_puart->println("AT+GMR");
+  m_puart->println(F("AT+GMR"));
   return recvFindAndFilter("OK", "\r\n", "\r\nOK", version);
 }
 
@@ -496,7 +528,7 @@ bool ESP8266::qATCWMODE(uint8_t *mode)
     return false;
   }
   rx_empty();
-  m_puart->println("AT+CWMODE?");
+  m_puart->println(F("AT+CWMODE?"));
   ret = recvFindAndFilter("OK", "+CWMODE:", "\r\nOK", str_mode);
   if (ret) {
     *mode = (uint8_t)str_mode.toInt();
@@ -510,7 +542,7 @@ bool ESP8266::sATCWMODE(uint8_t mode)
 {
   String data;
   rx_empty();
-  m_puart->print("AT+CWMODE=");
+  m_puart->print(F("AT+CWMODE="));
   m_puart->println(mode);
 
   data = recvString("OK", "no change");
@@ -524,13 +556,14 @@ bool ESP8266::sATCWJAP(String ssid, String pwd)
 {
   String data;
   rx_empty();
-  m_puart->print("AT+CWJAP=\"");
+  m_puart->print(F("AT+CWJAP=\""));
   m_puart->print(ssid);
-  m_puart->print("\",\"");
+  m_puart->print(F("\",\""));
   m_puart->print(pwd);
-  m_puart->println("\"");
-
-  data = recvString("OK", "FAIL", 10000);
+  m_puart->println(F("\""));
+  data = recvString("OK", "FAIL", 20000);  //traked
+//  Serial.print(F("In sATCWJAP recvString:"));
+//  Serial.println(data);  //traked
   if (data.indexOf("OK") != -1) {
     return true;
   }
@@ -541,7 +574,7 @@ bool ESP8266::eATCWLAP(String &list)
 {
   String data;
   rx_empty();
-  m_puart->println("AT+CWLAP");
+  m_puart->println(F("AT+CWLAP"));
   return recvFindAndFilter("OK", "\r\n", "\r\nOK", list, 10000);
 }
 
@@ -549,7 +582,7 @@ bool ESP8266::eATCWQAP(void)
 {
   String data;
   rx_empty();
-  m_puart->println("AT+CWQAP");
+  m_puart->println(F("AT+CWQAP"));
   return recvFind("OK");
 }
 
@@ -577,7 +610,7 @@ bool ESP8266::eATCWLIF(String &list)
 {
   String data;
   rx_empty();
-  m_puart->println("AT+CWLIF");
+  m_puart->println(F("AT+CWLIF"));
   return recvFindAndFilter("OK", "\r\n", "\r\nOK", list);
 }
 bool ESP8266::eATCIPSTATUS(String &list)
@@ -585,7 +618,7 @@ bool ESP8266::eATCIPSTATUS(String &list)
   String data;
   delay(100);
   rx_empty();
-  m_puart->println("AT+CIPSTATUS");
+  m_puart->println(F("AT+CIPSTATUS"));
   return recvFindAndFilter("OK", "\r\n", "\r\nOK", list);
 }
 bool ESP8266::sATCIPSTARTSingle(String type, String addr, uint32_t port)
@@ -670,13 +703,13 @@ bool ESP8266::sATCIPCLOSEMulitple(uint8_t mux_id)
 bool ESP8266::eATCIPCLOSESingle(void)
 {
   rx_empty();
-  m_puart->println("AT+CIPCLOSE");
-  return recvFind("OK", 5000);
+  m_puart->println(F("AT+CIPCLOSE"));
+  return recvFind("OK", 100);  // Trakedm was 5000
 }
 bool ESP8266::eATCIFSR(String &list)
 {
   rx_empty();
-  m_puart->println("AT+CIFSR");
+  m_puart->println(F("AT+CIFSR"));
   return recvFindAndFilter("OK", "+CIFSR:STAIP,", "\r\n+CIFSR:STAMAC", list);
 }
 bool ESP8266::sATCIPMUX(uint8_t mode)
@@ -707,7 +740,7 @@ bool ESP8266::sATCIPSERVER(uint8_t mode, uint32_t port)
     return false;
   } else {
     rx_empty();
-    m_puart->println("AT+CIPSERVER=0");
+    m_puart->println(F("AT+CIPSERVER=0"));
     return recvFind("\r\n");
   }
 }
